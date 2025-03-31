@@ -1,7 +1,8 @@
 # Desafio Back-end PicPay
 
-Primeiramente, obrigado pelo seu interesse em trabalhar na melhor plataforma de pagamentos do mundo!
-Abaixo você encontrará todos as informações necessárias para iniciar o seu teste.
+Desafio incompleto 30/03/25 - 00h
+NestJs - TypeScript
+Ainda irei dar continuidade, para finalização do desafio.
 
 ## Avisos antes de começar
 
