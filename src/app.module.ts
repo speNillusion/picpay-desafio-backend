@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from './config/config.module';
-import { DatabaseModule } from './database/database.module';
-import { UsersModule } from './users/users.module';
-import { WalletsModule } from './wallets/wallets.module';
-import { TransactionsModule } from './transactions/transactions.module';
-import { ExternalModule } from './external/external.module';
+import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { DbMain } from './_database/db.main';
 
 @Module({
   imports: [
-    ConfigModule,
-    DatabaseModule,
-    UsersModule,
-    WalletsModule,
-    TransactionsModule,
-    ExternalModule,
+    ConfigModule.forRoot(
+      {
+        isGlobal: true
+      }
+    ),
   ],
+  controllers: [
+    AppController
+  ],
+  providers: [
+    DbMain,
+  ]
 })
 export class AppModule { }
