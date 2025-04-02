@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { DbMain } from './_database/db.main';
 import { CommonRegister } from './users/common/common.register';
 import { MerchantRegister } from './users/merchant/merchant.register';
+import { Cripto } from './users/DTO/dto.cripto';
+import { PwdEncrypt } from './users/DTO/dto.password';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { MerchantRegister } from './users/merchant/merchant.register';
     DbMain,
     CommonRegister,
     MerchantRegister,
+    Cripto,
+    PwdEncrypt,
   ]
 })
 export class AppModule { }

@@ -1,10 +1,13 @@
-import { Controller, Get, HttpStatus, Post, Res, Body } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Post, Res, Body, Inject } from "@nestjs/common";
 import { HttpCode } from "@nestjs/common";
 import { Response } from "express";
 import { checkDb } from "./_database/db.check";
 import { CommonRegister } from "./users/common/common.register";
 import { MerchantRegister } from "./users/merchant/merchant.register";
 import { RegisterDto } from "./users/DTO/dto.register";
+import { DbMain } from "./_database/db.main";
+import { PwdEncrypt } from "./users/DTO/dto.password";
+import { Cripto } from "./users/DTO/dto.cripto";
 
 @Controller()
 export class AppController {
@@ -12,7 +15,7 @@ export class AppController {
     private readonly commonRegister: CommonRegister,
     private readonly merchantRegister: MerchantRegister
   ) {
-    this.commonRegister = new CommonRegister();
+    this.commonRegister = new CommonRegister(new DbMain, new PwdEncrypt, new Cripto);
     this.merchantRegister = new MerchantRegister();
   }
 

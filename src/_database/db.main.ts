@@ -1,6 +1,8 @@
 // dbmain.ts
+import { Injectable } from '@nestjs/common';
 import { dbConnection } from './db.connect';
 
+@Injectable()
 export class DbMain {
   public async get(query: string, params: string[]): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -19,9 +21,14 @@ export class DbMain {
     return this.get('SELECT * FROM users', []);
   }
 
-  public async getKey(email: string): Promise<string> {
-    const results = await this.get('SELECT token_key FROM users WHERE email = ?', [email]);
-    return results.length ? results[0].token_key : '';
+  public async getType(email: string): Promise<string> {
+    const results = await this.get('SELECT type FROM users WHERE email = ?', [email]);
+    return results.length ? results[0].type : '';
+  }
+
+  public async cpfNotRepeat(cpf: number): Promise<boolean> {
+    const results = await this.get('SELECT cpf FROM users WHERE cpf = ?', [cpf.toString()]);
+    return results.length > 0;
   }
 
   public async getId(email: string): Promise<number | null> {
@@ -29,11 +36,11 @@ export class DbMain {
     return results.length ? results[0].id : null;
   }
 
-  public async pushDb(nome: string, email: string, pass: string, token_key: string): Promise<boolean> {
+  public async pushDb(nome: string, email: string, pass: string, cpf: number, type: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       dbConnection.query(
-        'INSERT INTO users (name, email, pass, token_key) VALUES (?, ?, ?, ?)',
-        [nome, email, pass, token_key],
+        'INSERT INTO users (name, email, pass, cpf, type) VALUES (?, ?, ?, ?, ?)',
+        [nome, email, pass, cpf, type],
         (err) => {
           if (err) {
             console.error('Erro ao inserir dados:', err.message);

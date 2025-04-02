@@ -11,18 +11,26 @@ export function CpfUnico(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         async validate(value: any, args: ValidationArguments): Promise<boolean> {
+          if (!value) return false;
+          
           const db = new DbMain();
-        
+          
           try {
-            const users = await db.getDb();
-            return !users.some(user => user.cpf === value);
+            const responseCpf = await db.cpfNotRepeat(value);
+
+            if (responseCpf) {
+              return false;
+            } else {
+              const users = await db.getDb();
+              return !users.some(user => user.cpf === value);
+            }
           } catch (error) {
-            console.error('Erro ao verificar cpf no banco de dados:', error);
+            console.error('Error checking CPF in database:', error);
             return false;
           }
         },
         defaultMessage() {
-          return 'O CPF já existe';
+          return 'CPF already exists';
         }
       }
     });

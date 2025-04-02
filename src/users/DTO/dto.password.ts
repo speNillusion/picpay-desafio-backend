@@ -1,25 +1,16 @@
+import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 
+@Injectable()
 export class PwdEncrypt {
-    private arg: string;
 
-    constructor(arg: string) {
-        this.arg = arg;
-    }
+    constructor() {}
 
-    crypt(security: number = 1): Promise<string> {
-        let hashs = this.arg;
+    public async crypt(password: string, security: number = 1): Promise<string> {
+        let hashs = password;
         for (let i = 0; i < security; i++) {
             hashs = createHash('sha256').update(hashs.toString()).digest('hex');
         }
         return Promise.resolve(hashs);
-    }
-
-    static async encryptPassword(password: string, security: number = 1): Promise<string> {
-        let hashs = password;
-        for (let i = 0; i < security; i++) {
-            hashs = createHash('sha256').update(hashs).digest('hex');
-        }
-        return hashs;
-    }
+    };
 }

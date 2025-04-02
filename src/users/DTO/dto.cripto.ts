@@ -1,21 +1,16 @@
-export class Cripto {
-    private arg: string;
+import { Injectable } from "@nestjs/common";
 
-    constructor(arg: string) {
-        this.arg = arg;
-    }
+@Injectable()
+export class Cripto {
+
+    constructor() {}
     // Método estático para criptografar o email
-    static encryptEmail(email: string): string {
+    async encryptEmail(email: string): Promise<string>  {
         return Buffer.from(email, 'ascii').toString('base64');
     }
 
-    // Métodos de instância para criptografar e descriptografar
-    crypt(): string {
-        return Buffer.from(this.arg, 'ascii').toString('base64');
-    }
-
-    decrypt(): string {
-        return Buffer.from(this.arg, 'base64').toString('ascii');
+    async decrypt(email: string): Promise<string> {
+        return Buffer.from(email, 'base64').toString('ascii');
     }
 }
 
