@@ -8,7 +8,7 @@ export class DbCreate {
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
-            cpf VARCHAR(14) UNIQUE NOT NULL,
+            cpf VARCHAR(11) UNIQUE NOT NULL,
             pass VARCHAR(255) NOT NULL,
             type ENUM('common', 'merchant') NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
