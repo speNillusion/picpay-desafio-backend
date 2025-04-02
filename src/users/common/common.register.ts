@@ -29,8 +29,6 @@ export class CommonRegister {
         const hashEmail = await this.hashEmail.encryptEmail(email);
         const hashPass = await this.hashPassword.crypt(pass);
 
-        /* verify if email already exists */
-
         try {
             /* verify if cpf have obrigatory eleven digits */
             if (cpf.toString().length !== 11) {
