@@ -4,7 +4,7 @@ import { dbConnection } from './db.connect';
 
 @Injectable()
 export class DbMain {
-  public async get(query: string, params: (string[]|string)): Promise<any> {
+  public async get(query: string, params: (string[] | string)): Promise<any> {
     return new Promise((resolve, reject) => {
       dbConnection.query(query, params, (err, row) => {
         if (err) {
@@ -18,7 +18,7 @@ export class DbMain {
   }
 
   /*
-  1° --> Fix function with try/catch and throw error
+  # FEITO   1° --> Fix function with try/catch and throw error;
   2° --> Create a function to get wallet from user by email:
          func getWalletByEmail(email: string): -> get id from email, after get wallet from id, finally return wallet;
   3° --> Create a function to make transactions:
@@ -43,18 +43,52 @@ export class DbMain {
         ---> to debugLevel console.log() --> errors and Logs;
   */
 
-  public async getDb(): Promise<any[]> {
-    return this.get('SELECT * FROM users', []);
+  public async getDb(): Promise<string[]> {
+    try {
+      const results = await this.get('SELECT * FROM users', []);
+      return results;
+    } catch (error) {
+      console.error('Error getting DB:', error);
+      throw error;
+    }
   }
 
   public async getType(email: string): Promise<string> {
-    const results = await this.get('SELECT type FROM users WHERE email = ?', [email]);
-    return results.length ? results[0].type : '';
+    try {
+      if (!email || typeof email !== 'string') {
+        throw new Error('Invalid email');
+      }
+      
+      const results = await this.get('SELECT type FROM users WHERE email = ?', [email.trim()]);
+      
+      if (!results || results.length === 0) {
+        throw new Error('Type not found');
+      }
+      
+      return results[0].type;
+    } catch (error) {
+      console.error('Error getting Type:', error);
+      throw error;
+    }
   }
 
   public async cpfNotRepeat(cpf: number): Promise<boolean> {
-    const results = await this.get('SELECT cpf FROM users WHERE cpf = ?', [cpf.toString()]);
-    return results.length > 0;
+    try {
+      if (!cpf || typeof cpf !== 'number') {
+        throw new Error('Invalid CPF');
+      }
+      
+      const results = await this.get('SELECT cpf FROM users WHERE cpf = ?', [cpf.toString()]);
+      
+      if (!results || results.length === 0) {
+        throw new Error('CPF not found');
+      }
+      
+      return results.length > 0;
+    } catch (error) {
+      console.error('Error getting ID:', error);
+      throw error;
+    }
   }
 
   public async getId(email: string): Promise<number> {
@@ -62,13 +96,13 @@ export class DbMain {
       if (!email || typeof email !== 'string') {
         throw new Error('Invalid email');
       }
-      
+
       const results = await this.get('SELECT id FROM users WHERE email = ?', [email.trim()]);
-      
+
       if (!results || results.length === 0) {
         throw new Error('User not found');
       }
-      
+
       return results[0].id;
     } catch (error) {
       console.error('Error getting ID:', error);
