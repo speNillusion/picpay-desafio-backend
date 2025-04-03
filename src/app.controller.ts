@@ -8,6 +8,7 @@ import { RegisterDto } from "./users/DTO/dto.register";
 import { DbMain } from "./_database/db.main";
 import { PwdEncrypt } from "./users/DTO/dto.password";
 import { Cripto } from "./users/DTO/dto.cripto";
+import { TokenService } from "./token/token";
 
 @Controller()
 export class AppController {
@@ -15,7 +16,7 @@ export class AppController {
     private readonly commonRegister: CommonRegister,
     private readonly merchantRegister: MerchantRegister
   ) {
-    this.commonRegister = new CommonRegister(new DbMain, new PwdEncrypt, new Cripto);
+    this.commonRegister = new CommonRegister(new DbMain, new PwdEncrypt, new Cripto, new TokenService);
     this.merchantRegister = new MerchantRegister();
   }
 
@@ -67,10 +68,9 @@ export class AppController {
 
   @Get('/common/register')
   async commonResGet(
-    @Body() data: RegisterDto,
     @Res() res: Response
   ) {
-    return await this.commonRegister.register(data, res);
+    return await this.commonRegister.getRegister(res);
   }
   /* common User */
 
@@ -79,13 +79,14 @@ export class AppController {
   /* merchant User */
   @Post('/merchant/register')
   async merchantRes(
+    @Body() data: RegisterDto,
     @Res() res: Response
   ) {
     return Promise.resolve(
       res.status(HttpStatus.OK).json(
         {
           statusCode: HttpStatus.OK,
-          message: await this.merchantRegister.register(),
+          message: await this.merchantRegister.merchantRegister(data,res),
         }
       ));
   }
@@ -94,8 +95,10 @@ export class AppController {
   async merchantResGet(
     @Res() res: Response
   ) {
-    await this.merchantRes(res);
+    await this.merchantRegister.merchantGetregister(res);
   }
   /* merchant User */
+
+
 
 }

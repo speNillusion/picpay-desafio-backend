@@ -6,6 +6,7 @@ import { CommonRegister } from './users/common/common.register';
 import { MerchantRegister } from './users/merchant/merchant.register';
 import { Cripto } from './users/DTO/dto.cripto';
 import { PwdEncrypt } from './users/DTO/dto.password';
+import { TokenService } from './token/token';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PwdEncrypt } from './users/DTO/dto.password';
     MerchantRegister,
     Cripto,
     PwdEncrypt,
+    TokenService,
   ]
 })
 export class AppModule { }
