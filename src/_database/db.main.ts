@@ -1,6 +1,7 @@
 // dbmain.ts
 import { Injectable } from '@nestjs/common';
 import { dbConnection } from './db.connect';
+import { Cripto } from 'src/users/DTO/dto.cripto';
 
 @Injectable()
 export class DbMain {
@@ -32,11 +33,23 @@ export class DbMain {
   }
 
   public async getId(email: string): Promise<number | null> {
-    const results = await this.get('SELECT id FROM users WHERE email = ?', [email]);
-    return results.length ? results[0].id : null;
+    try {
+      const results = await this.get('SELECT id FROM users WHERE email = ?', [email]);
+      return results
+    } catch (error) {
+      console.error('Error getting user ID:', error);
+      return null;
+    }
   }
 
   public async pushDb(nome: string, email: string, pass: string, cpf: number, type: string): Promise<boolean> {
+    // const decryptedEmail = new Cripto().decrypt(email);
+    // const userId = await this.getId(decryptedEmail);
+    // console.log(userId);
+    // console.log(email)
+
+    /* NEED FIX THAT, TO CREATE WALLET TOGHETHER ACCOUNT COMMON AND MERCHANT USERS */
+
     return new Promise((resolve, reject) => {
       dbConnection.query(
         'INSERT INTO users (name, email, pass, cpf, type) VALUES (?, ?, ?, ?, ?)',
@@ -51,6 +64,20 @@ export class DbMain {
           }
         }
       );
+
+      // dbConnection.query(
+      //   'INSERT INTO wallets (user_id) VALUES (?)',
+      //   [userId],
+      //   (err) => {
+      //     if (err) {
+      //       console.error('Erro ao inserir wallet:', err.message);
+      //       reject(false);
+      //     } else {
+      //       console.log('wallet inserido com sucesso.');
+      //       resolve(true);
+      //     }
+      //   }
+      // );
     });
   }
 }
