@@ -18,7 +18,7 @@ export class DbMain {
     });
   }
 
-  public async getWallet(email: string): Promise<any> {
+  public async getWallet(email: string): Promise<number> {
     try {
       const userId = await this.getId(email);
       if (!userId) {
@@ -27,13 +27,113 @@ export class DbMain {
 
       const wallet = await this.get('SELECT * FROM wallets WHERE user_id = ?', [userId]);
       if (!wallet || wallet.length === 0) {
-        throw new Error('Wallet not found'); 
+        throw new Error('Wallet not found');
       }
 
       return wallet[0].balance;
     } catch (walletError) {
       console.error('Error getting that wallet:', walletError);
       throw new Error('Error getting that wallet');
+    }
+  }
+
+  public async transferAmmount(senderEmail: string, receiverEmail: string, ammount: number): Promise<boolean> {
+    try {
+      const typeSender = await this.getType(senderEmail);
+      const senderId = await this.getId(senderEmail);
+      const receiverId = await this.getId(receiverEmail);
+      const senderBalance = await this.getWallet(senderEmail);
+
+      /* Security Verifications */
+      if (!ammount || ammount <= 0) {
+        throw new Error('Invalid amount');
+      }
+
+      if (!senderId || !receiverId) {
+        throw new Error('User not found');
+      }
+
+      if (typeSender === 'merchant') {
+        throw new Error('Merchant users cant transfer amount');
+      }
+
+      if (senderBalance < ammount) {
+        throw new Error('Insufficient funds');
+      }
+
+      // Perform transfer transaction
+      return new Promise((resolve, reject) => {
+        dbConnection.query(
+          'UPDATE wallets SET balance = balance - ? WHERE user_id = ?',
+          [ammount, senderId],
+          (debitErr) => {
+            if (debitErr) {
+              console.error('Error debiting sender:', debitErr);
+              reject(false);
+              return;
+            }
+
+            dbConnection.query(
+              'UPDATE wallets SET balance = balance + ? WHERE user_id = ?',
+              [ammount, receiverId],
+              (creditErr) => {
+                if (creditErr) {
+                  console.error('Error crediting receiver:', creditErr);
+                  /* Rollback if error */
+                  dbConnection.query(
+                    'UPDATE wallets SET balance = balance + ? WHERE user_id = ?',
+                    [ammount, senderId]
+                  );
+                  reject(false);
+                  return;
+                }
+
+                // Record transaction
+                dbConnection.query(
+                  'INSERT INTO transactions (sender_id, receiver_id, amount) VALUES (?, ?, ?)',
+                  [senderId, receiverId, ammount],
+                  (transErr) => {
+                    if (transErr) {
+                      console.error('Error recording transaction:', transErr);
+                      reject(false);
+                      return;
+                    }
+                    resolve(true);
+                  }
+                );
+              }
+            );
+          }
+        );
+      });
+
+    } catch (transferError) {
+      console.error('Error transferring amount:', transferError);
+      throw transferError;
+    }
+  }
+
+  public async getTransactions(userId?: number): Promise<any> {
+    try {
+      let query = 'SELECT * FROM transactions';
+      let params: any[] = [];
+
+      if (userId) {
+        query = 'SELECT * FROM transactions WHERE sender_id = ? OR receiver_id = ?';
+        params = [userId, userId];
+      }
+
+      const transactions = await this.get(query, params);
+
+      if (!transactions || transactions.length === 0) {
+        console.debug('No transactions found');
+        return [];
+      }
+
+      return transactions;
+    } catch (error) {
+      console.error('Error getting transactions:', error);
+      throw error;
     }
   }
 
@@ -52,12 +152,12 @@ export class DbMain {
                                                                             finally return Promise(resolve, reject) -> to user;
         ---> to debugLevel console.log() --> errors and Logs;
 
-  4° --> Create a function to get transactions by user id:
+  # FEITO   4° --> Create a function to get transactions by user id:
          func getTransactionsByUserId(userId: number):
         ---> get all transactions from user id, after that, return Promise(resolve, reject) -> to user;
         ---> to debugLevel console.log() --> errors and Logs;
 
-  5° --> Create a function to get all transactions:
+  # FEITO   5° --> Create a function to get all transactions:
          func getAllTransactions():
         ---> get all transactions, after that, return Promise(resolve, reject) -> to user;
         ---> to debugLevel console.log() --> errors and Logs;
