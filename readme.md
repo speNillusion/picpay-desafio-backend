@@ -1,7 +1,7 @@
 # Desafio Back-end PicPay
 
-initiated 4 days ago;
-Desafio incompleto 03/04/25 - 17h
+initiated 5 days ago;
+Desafio incompleto 04/04/25 - 22h
 NestJs - TypeScript
 Ainda irei dar continuidade, para finalização do desafio.
 
