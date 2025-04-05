@@ -1,10 +1,11 @@
 // dbmain.ts
 import { Injectable } from '@nestjs/common';
 import { dbConnection } from './db.connect';
+import { User } from './types';
 
 @Injectable()
 export class DbMain {
-  public async get(query: string, params: (string[] | string)): Promise<any> {
+  public async get(query: string, params: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
       dbConnection.query(query, params, (err, row) => {
         if (err) {
@@ -17,11 +18,30 @@ export class DbMain {
     });
   }
 
+  public async getWallet(email: string): Promise<any> {
+    try {
+      const userId = await this.getId(email);
+      if (!userId) {
+        throw new Error('User not found');
+      };
+
+      const wallet = await this.get('SELECT * FROM wallets WHERE user_id = ?', [userId]);
+      if (!wallet || wallet.length === 0) {
+        throw new Error('Wallet not found'); 
+      }
+
+      return wallet[0].balance;
+    } catch (walletError) {
+      console.error('Error getting that wallet:', walletError);
+      throw new Error('Error getting that wallet');
+    }
+  }
+
   /*
   # FEITO   1° --> Fix function with try/catch and throw error;
-  2° --> Create a function to get wallet from user by email:
+  # FEITO   2° --> Create a function to get wallet from user by email:
          func getWalletByEmail(email: string): -> get id from email, after get wallet from id, finally return wallet;
-  3° --> Create a function to make transactions:
+  # FEITO   3° --> Create a function to make transactions:
          func transferAmmount(emailCommonUser: number, emailMerchantUser): 
         ---> getWalletByEmail(emailCommonUser) | getWalletByEmail(emailMe), verify if ammount is valid,
                                                                             positive, and if user have enough money,
@@ -43,7 +63,7 @@ export class DbMain {
         ---> to debugLevel console.log() --> errors and Logs;
   */
 
-  public async getDb(): Promise<string[]> {
+  public async getDb(): Promise<User[]> {
     try {
       const results = await this.get('SELECT * FROM users', []);
       return results;
@@ -58,13 +78,13 @@ export class DbMain {
       if (!email || typeof email !== 'string') {
         throw new Error('Invalid email');
       }
-      
+
       const results = await this.get('SELECT type FROM users WHERE email = ?', [email.trim()]);
-      
+
       if (!results || results.length === 0) {
         throw new Error('Type not found');
       }
-      
+
       return results[0].type;
     } catch (error) {
       console.error('Error getting Type:', error);
@@ -75,15 +95,17 @@ export class DbMain {
   public async cpfNotRepeat(cpf: number): Promise<boolean> {
     try {
       if (!cpf || typeof cpf !== 'number') {
+        console.error('Invalid CPF');
         throw new Error('Invalid CPF');
       }
-      
+
       const results = await this.get('SELECT cpf FROM users WHERE cpf = ?', [cpf.toString()]);
-      
+
       if (!results || results.length === 0) {
-        throw new Error('CPF not found');
+        console.debug('CPF not found');
+        return false;
       }
-      
+
       return results.length > 0;
     } catch (error) {
       console.error('Error getting ID:', error);

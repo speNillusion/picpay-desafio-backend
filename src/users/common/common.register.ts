@@ -5,7 +5,6 @@ import { DbMain } from "src/_database/db.main";
 import { PwdEncrypt } from "../DTO/dto.password";
 import { Cripto } from "../DTO/dto.cripto";
 import { TokenService } from "src/token/token";
-import { stringify } from "querystring";
 
 @Controller('/common')
 @Injectable()
@@ -84,7 +83,7 @@ export class CommonRegister {
                 statusCode: HttpStatus.CREATED,
                 message: 'User registered successfully',
                 type: type,
-                token: access,
+                token: access
             });
 
         } catch (error) {

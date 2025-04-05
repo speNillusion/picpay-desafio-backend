@@ -15,7 +15,7 @@ export function EmailUnico(validationOptions?: ValidationOptions) {
           const db = new DbMain();
           const emailEncrypted = await new Cripto().encryptEmail(value);
           try {
-            
+
             const users = await db.getDb();
             return !users.some(user => user.email === emailEncrypted);
           } catch (error) {
