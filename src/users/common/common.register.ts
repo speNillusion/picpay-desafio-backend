@@ -10,10 +10,10 @@ import { TokenService } from "src/token/token";
 @Injectable()
 export class CommonRegister {
     constructor(
-        private readonly dbmain: DbMain,
-        private readonly hashPassword: PwdEncrypt,
-        private readonly hashEmail: Cripto,
-        private readonly accessToken: TokenService
+        protected readonly dbmain: DbMain,
+        protected readonly hashPassword: PwdEncrypt,
+        protected readonly hashEmail: Cripto,
+        protected readonly accessToken: TokenService
     ) {
         this.dbmain = new DbMain();
         this.hashEmail = new Cripto();

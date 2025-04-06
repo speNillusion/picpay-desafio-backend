@@ -37,6 +37,22 @@ export class DbMain {
     }
   }
 
+  public async verifyEmailPass(email: string, pass: string): Promise<boolean> {
+    try {
+      if (!email || !pass) {
+        return false;
+      }
+
+      const query = 'SELECT id FROM users WHERE email = ? AND pass = ?';
+      const result = await this.get(query, [email.trim(), pass.trim()]);
+
+      return Array.isArray(result) && result.length > 0;
+    } catch (error) {
+      console.error('Error verifying credentials:', error);
+      throw new Error('Failed to verify credentials');
+    }
+  }
+
   public async transferAmmount(senderEmail: string, receiverEmail: string, ammount: number): Promise<boolean> {
     try {
       const typeSender = await this.getType(senderEmail);
@@ -61,7 +77,7 @@ export class DbMain {
         throw new Error('Insufficient funds');
       }
 
-      // Perform transfer transaction
+
       return new Promise((resolve, reject) => {
         dbConnection.query(
           'UPDATE wallets SET balance = balance - ? WHERE user_id = ?',
@@ -88,7 +104,7 @@ export class DbMain {
                   return;
                 }
 
-                // Record transaction
+
                 dbConnection.query(
                   'INSERT INTO transactions (sender_id, receiver_id, amount) VALUES (?, ?, ?)',
                   [senderId, receiverId, ammount],
@@ -113,7 +129,7 @@ export class DbMain {
     }
   }
 
-  public async getTransactions(userId?: number): Promise<any> {
+  public async getTransactions(userId?: number): Promise<any[]> {
     try {
       let query = 'SELECT * FROM transactions';
       let params: any[] = [];
@@ -135,33 +151,7 @@ export class DbMain {
       console.error('Error getting transactions:', error);
       throw error;
     }
-  }
-
-  /*
-  # FEITO   1° --> Fix function with try/catch and throw error;
-  # FEITO   2° --> Create a function to get wallet from user by email:
-         func getWalletByEmail(email: string): -> get id from email, after get wallet from id, finally return wallet;
-  # FEITO   3° --> Create a function to make transactions:
-         func transferAmmount(emailCommonUser: number, emailMerchantUser): 
-        ---> getWalletByEmail(emailCommonUser) | getWalletByEmail(emailMe), verify if ammount is valid,
-                                                                            positive, and if user have enough money,
-                                                                            merchant users wont be able to transfer, him only receipe transfers,
-                                                                            ammount will be deducted from common user and added to merchant user,
-                                                                            after that, a transaction will be incremented in transactions table,
-                                                                            with common user id, merchant user id, ammount, and where out, where entry ids,
-                                                                            finally return Promise(resolve, reject) -> to user;
-        ---> to debugLevel console.log() --> errors and Logs;
-
-  # FEITO   4° --> Create a function to get transactions by user id:
-         func getTransactionsByUserId(userId: number):
-        ---> get all transactions from user id, after that, return Promise(resolve, reject) -> to user;
-        ---> to debugLevel console.log() --> errors and Logs;
-
-  # FEITO   5° --> Create a function to get all transactions:
-         func getAllTransactions():
-        ---> get all transactions, after that, return Promise(resolve, reject) -> to user;
-        ---> to debugLevel console.log() --> errors and Logs;
-  */
+  };
 
   public async getDb(): Promise<User[]> {
     try {
@@ -271,6 +261,46 @@ export class DbMain {
     } catch (error) {
       console.error('Error in pushDb:', error);
       return false;
+    }
+  }
+
+  public async depositByEmail(email: string, amount: number): Promise<boolean> {
+    try {
+      // Validações básicas
+      if (!email || typeof email !== 'string') {
+        throw new Error('Email inválido');
+      }
+
+      if (!amount || amount <= 0) {
+        throw new Error('Valor de depósito inválido');
+      }
+
+      // Obter o ID do usuário pelo email
+      const userId = await this.getId(email);
+
+      if (!userId) {
+        throw new Error('Usuário não encontrado');
+      }
+
+      // Atualizar o saldo na carteira
+      return new Promise((resolve, reject) => {
+        dbConnection.query(
+          'UPDATE wallets SET balance = balance + ? WHERE user_id = ?',
+          [amount, userId],
+          (err) => {
+            if (err) {
+              console.error('Erro ao depositar valor:', err.message);
+              reject(false);
+              return;
+            }
+
+            resolve(true);
+          }
+        );
+      });
+    } catch (error) {
+      console.error('Erro ao realizar depósito:', error);
+      throw error;
     }
   }
 }

@@ -7,6 +7,10 @@ import { MerchantRegister } from './users/merchant/merchant.register';
 import { Cripto } from './users/DTO/dto.cripto';
 import { PwdEncrypt } from './users/DTO/dto.password';
 import { TokenService } from './token/token';
+import { CommonLogin } from './users/common/common.login';
+import { MerchantLogin } from './users/merchant/merchant.login';
+import { TransactionService } from './transactions/transaction.service';
+import { DepositService } from './transactions/deposit.service';
 
 @Module({
   imports: [
@@ -26,6 +30,10 @@ import { TokenService } from './token/token';
     Cripto,
     PwdEncrypt,
     TokenService,
+    CommonLogin,
+    MerchantLogin,
+    TransactionService,
+    DepositService,
   ]
 })
 export class AppModule { }
